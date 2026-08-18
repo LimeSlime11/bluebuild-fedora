@@ -1,41 +1,61 @@
+---
 name: Build ISO
 
 on:
   workflow_dispatch:
 
+env:
+  IMAGE_NAME: ${{ github.event.repository.name }}
+  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
+  DEFAULT_TAG: "latest"
+  BIB_IMAGE: "quay.io/centos-bootc/bootc-image-builder:latest"
+
 concurrency:
-  group: build-iso
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
-  build-iso:
-    name: Build bootable ISO
-    runs-on: ubuntu-latest
+  build:
+    name: Build ISO
+    runs-on: ubuntu-24.04
 
     permissions:
       contents: read
       packages: read
+      id-token: write
 
     steps:
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare environment
+        run: |
+          USER_UID=$(id -u)
+          USER_GID=$(id -g)
+
+          echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> "$GITHUB_ENV"
+          echo "IMAGE_NAME=${IMAGE_NAME,,}" >> "$GITHUB_ENV"
+          echo "USER_UID=${USER_UID}" >> "$GITHUB_ENV"
+          echo "USER_GID=${USER_GID}" >> "$GITHUB_ENV"
+
+      - name: Maximize build space
+        uses: ublue-os/remove-unwanted-software@cc0becac701cf642c8f0a6613bbdaf5dc36b259e # v9
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Build ISO
-        id: build-iso
-        uses: osbuild/bootc-image-builder-action@v0.10.1
+        id: build
+        uses: osbuild/bootc-image-builder-action@main
         with:
-          image: ghcr.io/${{ github.repository_owner }}/my-kde-image:latest
-          types: |
-            anaconda-iso
+          builder-image: ${{ env.BIB_IMAGE }}
+          image: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
+          chown: ${{ env.USER_UID }}:${{ env.USER_GID }}
+          types: anaconda-iso
+          additional-args: --use-librepo=True --rootfs xfs
 
       - name: Upload ISO
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: my-kde-image-iso
-          path: ${{ steps.build-iso.outputs.output-directory }}
+          name: ${{ env.IMAGE_NAME }}-iso
+          path: ${{ steps.build.outputs.output-directory }}
           if-no-files-found: error
           retention-days: 7
+          compression-level: 0
