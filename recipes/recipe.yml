@@ -13,4 +13,3 @@ modules:
       packages:
         - cowsay
 
-  - type: signing
