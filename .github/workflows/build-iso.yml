@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: ${{ github.event.repository.name }}
+  IMAGE_NAME: my-kde-image
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
   DEFAULT_TAG: "latest"
   BIB_IMAGE: "quay.io/centos-bootc/bootc-image-builder:latest"
@@ -30,8 +30,6 @@ jobs:
           USER_UID=$(id -u)
           USER_GID=$(id -g)
 
-          echo "IMAGE_REGISTRY=${IMAGE_REGISTRY,,}" >> "$GITHUB_ENV"
-          echo "IMAGE_NAME=${IMAGE_NAME,,}" >> "$GITHUB_ENV"
           echo "USER_UID=${USER_UID}" >> "$GITHUB_ENV"
           echo "USER_GID=${USER_GID}" >> "$GITHUB_ENV"
 
@@ -50,16 +48,15 @@ jobs:
         uses: osbuild/bootc-image-builder-action@main
         with:
           builder-image: ${{ env.BIB_IMAGE }}
-          image: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
+          image: ghcr.io/limeslime11/my-kde-image:latest
           chown: ${{ env.USER_UID }}:${{ env.USER_GID }}
           types: anaconda-iso
           additional-args: --use-librepo=True --rootfs xfs
-              
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.IMAGE_NAME }}-iso
+          name: my-kde-image-iso
           path: ${{ steps.build.outputs.output-directory }}
           if-no-files-found: error
           retention-days: 7
