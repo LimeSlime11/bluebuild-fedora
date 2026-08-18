@@ -1,0 +1,41 @@
+name: Build ISO
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: build-iso
+  cancel-in-progress: true
+
+jobs:
+  build-iso:
+    name: Build bootable ISO
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build ISO
+        id: build-iso
+        uses: osbuild/bootc-image-builder-action@v1
+        with:
+          image: ghcr.io/${{ github.repository_owner }}/my-kde-image:latest
+          types: |
+            anaconda-iso
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-kde-image-iso
+          path: ${{ steps.build-iso.outputs.output-directory }}
+          if-no-files-found: error
+          retention-days: 7
