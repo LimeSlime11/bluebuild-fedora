@@ -26,5 +26,3 @@ modules:
     system:
       enabled:
         - reset-guest.service
-
-  - type: signing
