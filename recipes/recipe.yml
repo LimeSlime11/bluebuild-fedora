@@ -8,8 +8,23 @@ base-image: ghcr.io/blue-build/base-images/fedora-kinoite
 image-version: latest
 
 modules:
+  - type: files
+    files:
+      - source: system
+        destination: /
+
   - type: dnf
     install:
       packages:
         - cowsay
 
+  - type: script
+    scripts:
+      - create-admin.sh
+
+  - type: systemd
+    system:
+      enabled:
+        - create-guest.service
+
+  - type: signing
