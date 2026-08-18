@@ -1,0 +1,10 @@
+[KDE Action Restrictions][$i]
+run_command=false
+shell_access=false
+logout=true
+action/lock_screen=false
+action/start_new_session=false
+action/switch_user=false
+lineedit_text_completion=false
+run_desktop_files=false
+movable_toolbars=false

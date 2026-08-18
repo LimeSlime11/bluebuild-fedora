@@ -1,12 +1,11 @@
 [Unit]
-Description=Create guest user if missing
+Description=Reset guest user
 After=local-fs.target
 Before=display-manager.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/libexec/create-guest.sh
-RemainAfterExit=yes
+ExecStart=/usr/libexec/reset-guest.sh
 
 [Install]
 WantedBy=multi-user.target
