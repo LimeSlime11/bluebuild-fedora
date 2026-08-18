@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 
-name: my-kde-image
+name: ${{ vars.IMAGE_NAME }}
 description: My custom Fedora KDE bootc image.
 
 base-image: ghcr.io/blue-build/base-images/fedora-kinoite
