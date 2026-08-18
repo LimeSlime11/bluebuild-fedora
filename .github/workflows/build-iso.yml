@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: my-kde-image
+  IMAGE_NAME: ${{ vars.IMAGE_NAME }}
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
   DEFAULT_TAG: "latest"
   BIB_IMAGE: "quay.io/centos-bootc/bootc-image-builder:latest"
@@ -48,7 +48,7 @@ jobs:
         uses: osbuild/bootc-image-builder-action@main
         with:
           builder-image: ${{ env.BIB_IMAGE }}
-          image: ghcr.io/limeslime11/my-kde-image:latest
+          image: ${{ env.IMAGE_REGISTRY }}/${{ vars.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
           chown: ${{ env.USER_UID }}:${{ env.USER_GID }}
           types: anaconda-iso
           additional-args: --use-librepo=True --rootfs xfs
@@ -56,7 +56,7 @@ jobs:
       - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
-          name: my-kde-image-iso
+          name: ${{ vars.IMAGE_NAME }}-iso
           path: ${{ steps.build.outputs.output-directory }}
           if-no-files-found: error
           retention-days: 7
