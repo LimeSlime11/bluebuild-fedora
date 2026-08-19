@@ -1,4 +1,3 @@
----
 # yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
 
 name: bluebuild-custom
@@ -26,3 +25,5 @@ modules:
     system:
       enabled:
         - reset-guest.service
+
+  - type: signing
