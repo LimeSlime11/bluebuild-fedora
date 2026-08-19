@@ -1,35 +1,33 @@
 name: bluebuild
-
 on:
   schedule:
     - cron:
-        "00 06 * * *"
+        "00 06 * * *" # build at 06:00 UTC every day
+        # (20 minutes after last ublue images start building)
   push:
-    paths-ignore:
+    paths-ignore: # don't rebuild if only documentation has changed
       - "**.md"
-  pull_request:
-  workflow_dispatch:
 
+  pull_request:
+  workflow_dispatch: # allow manually triggering builds
 concurrency:
+  # only run one build at a time
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
-
 jobs:
   bluebuild:
     name: Build Custom Image
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       packages: write
       id-token: write
-
     strategy:
-      fail-fast: false
+      fail-fast: false # stop GH from cancelling all matrix builds if one fails
       matrix:
         recipe:
+          # !! Add your recipes here
           - recipe.yml
-
     steps:
       # the build is fully handled by the reusable github action
       - name: Build Custom Image
